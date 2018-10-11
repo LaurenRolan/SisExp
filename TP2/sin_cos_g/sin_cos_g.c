@@ -10,7 +10,7 @@
 
 void sinus(double angle)
 {
-	FILE *sinusFile = fopen("sinus.txt", "a");
+	FILE *sinusFile = fopen("sinus.txt", "a+");
 	if(!sinusFile)
 		exit(EXIT_FAILURE);
 	double seno = sin(angle * M_PI / 180.0);
@@ -22,7 +22,7 @@ void sinus(double angle)
 void cossinus(double angle)
 {
 
-	FILE *cossinusFile = fopen("cossinus.txt", "a");
+	FILE *cossinusFile = fopen("cossinus.txt", "a+");
 	if(!cossinusFile)
 		exit(EXIT_FAILURE);
 	double cosseno = cos(angle * M_PI / 180.0);
