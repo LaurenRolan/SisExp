@@ -4,4 +4,4 @@
 
 void sinus(double angle);
 
-void cossinus(double angle);
+void cosinus(double angle);

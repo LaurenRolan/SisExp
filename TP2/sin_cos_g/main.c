@@ -5,39 +5,71 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/wait.h>
 #include "sin_cos_g.h"
 
+double angle = 0.0; /* Nombre d'interval */
+
+void update( int sig )
+{
+	printf("Update\n");
+	sinus(angle);
+	cosinus(angle);
+	angle += 10;
+	if(angle > 360)
+		exit(2);
+	else
+		alarm(1);
+}
+
 int main( ) 
 {
-	double angle = 0.0; /* Nombre d'interval */
 	int pid1; /* PID du processus fils 1 */
 	int pid2; /* PID du processus fils 2 */
+	struct sigaction action;
 
-	FILE * cos = fopen("cosinus.txt", "w");
-	FILE * sin = fopen("sinus.txt", "w");
-	if(!cos || !sin)
+	action.sa_handler = &update;
+	sigaction(SIGALRM, &action, NULL);
+
+	FILE * commande = fopen("commandes.gp", "w");
+
+	if(!commande)	/* Si ce n'est pas possible d'ouvrir le fichier */
 		exit(EXIT_FAILURE);
-	fclose(cos);
-	fclose(sin);
 	
-	pid2 = fork( );
+	/* Récrire le fichier <<commande.gp>> */
+	fprintf(commande, "plot \"sinus.txt\" using 1:2 smooth cspline\n");
+	fprintf(commande, "plot \"cosinus.txt\" using 1:2 smooth cspline\n"); 
+	fclose(commande);
+
+
 	pid1 = fork( );
 
-	do {
-		if(pid1 < 0 || pid2 < 0) {
+	
+	if(pid1 < 0 ) {
+		printf("Erreur: échec du fork()\n");
+		exit(EXIT_FAILURE);
+	} else if( pid1 == 0 ) {
+		pid1 = getpid();
+		printf("Fils 1: %d\n", pid1);
+		for(;;);
+	} else {
+		pid2 = fork( );
+		if (pid2 < 0) {	
 			printf("Erreur: échec du fork()\n");
 			exit(EXIT_FAILURE);
-		} else if( pid1 == 0 && pid2 != 0 ) {
-			sinus(angle);
-			sleep(1);
-		} else if( pid1 != 0 && pid2 == 0 ) {
-			cossinus(angle);
-			sleep(1);
-		} else { wait(0); }
-		
-		angle += 10.0;	
-	}while(angle <= 360);
+		} else if( pid2 == 0 ) {
+			pid2 = getpid();
+			printf("Fils 2: %d\n", pid2);
+			for(;;);
+		} else {
+			printf("Pere: %d\n", getpid());
+			alarm(1);
+			wait(0);
+			wait(0);	
+		}
+	}
+	execlp("gnuplot", "gnuplot","-persist", "commandes.gp", 0);
 	
 	return 0;
 }

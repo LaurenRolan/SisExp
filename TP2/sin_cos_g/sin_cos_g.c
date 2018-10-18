@@ -19,10 +19,10 @@ void sinus(double angle)
 	fclose(sinusFile);
 }
 
-void cossinus(double angle)
+void cosinus(double angle)
 {
 
-	FILE *cossinusFile = fopen("cossinus.txt", "a+");
+	FILE *cossinusFile = fopen("cosinus.txt", "a+");
 	if(!cossinusFile)
 		exit(EXIT_FAILURE);
 	double cosseno = cos(angle * M_PI / 180.0);
