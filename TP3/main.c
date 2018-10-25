@@ -5,29 +5,29 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <signal.h>
 #include <sys/wait.h>
 #include "fsieve.h"
 
-
-void primes( int pipe[], int n )
-{
-		
-}
+#define PREP 0
 
 int main( int argc, char *argv[] )
 {
+	int n = strtol(argv[1], NULL, 10);
+	int anonymous_pipe[2];
+	pid_t pid1;
+	FILE *primes;
+
+	/* Clear prime_numbers.txt */
+	primes = fopen("prime_numbers.txt", "w");
+	fclose(primes);
+
 	if(argc < 2){
-		printf(stderr, "Invalid nulber of arguments.\n");
+		fprintf(stderr, "Invalid nulber of arguments.\n");
 		exit(1);
 	}
 
-	int n = strtol(argv[1], NULL, 10);
-
-	int anonymous_pipe[n];
-
-	if( pipe(anonymous_pipe) == 1 ){
-		handle_fatal_error("Error creating pipe.\n");
+	if( pipe(anonymous_pipe) == -1 ){
+		fprintf(stderr, "Error creating pipe.\n");
 		exit(1);
 	}
 
@@ -35,15 +35,22 @@ int main( int argc, char *argv[] )
 
 	
 	if(pid1 < 0 ) {
-		printf("Erreur: échec du fork()\n");
+		fprintf(stderr, "Erreur: échec du fork()\n");
 		exit(EXIT_FAILURE);
 	} else if( pid1 == 0 ) {
-		primes(anonymous_pipe, n);
-		for(;;);
+		if(PREP){
+			prep_fils(anonymous_pipe);
+		} else {
+			prime_fils(anonymous_pipe, n);
+		}
+
 	} else {
-		father(anonymous_pipe);
-		for(int i = 0; i < n; i++)
-			anonymous_pipe
+		if(PREP)
+		{
+			prep_pere(anonymous_pipe, n);
+		} else {
+			prime_pere(anonymous_pipe, n);
+		}
 	}
 	return 0;
 }
