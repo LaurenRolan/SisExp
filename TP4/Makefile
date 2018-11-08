@@ -2,8 +2,8 @@
 # File: Makefile
 
 CC=gcc
-CFLAGS=-W -Wall -I.
-LDFLAGS=-lm
+CFLAGS=-W -Wall -I. 
+LDFLAGS=-lm -lpthread
 
 matrix: matrix.o main.o
 	$(CC) -o matrix matrix.o main.o $(LDFLAGS) 
