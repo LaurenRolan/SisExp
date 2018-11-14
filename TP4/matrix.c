@@ -36,6 +36,16 @@ int random_matrix( double * matrix, int rows, int cols, int seed )
     return 0;
 }
 
+int ordered_matrix( double * matrix, int rows, int cols )
+{
+	for(int row = 0; row < rows; row++) {
+    	for(int col = 0; col < cols; col++) {
+    		matrix[row * cols + col] = row * cols + col;
+    	}
+    }
+    return 0;
+}
+
 double * product_matrix( double * matrix1, int rows1, int cols1, double * matrix2, int rows2, int cols2 )
 {
 	double * result;
@@ -44,10 +54,8 @@ double * product_matrix( double * matrix1, int rows1, int cols1, double * matrix
 		for(int col = 0; col < cols2; col++)
 		{	
 			double cell = 0;
-			for( int c = 0; c < cols2; c++ ) {
-				fprintf(stderr, "Index = %d\tInit = %.3f\t", row * cols2 + col, cell); 
-				cell += matrix1[row * cols2 + col] * matrix2[row * cols2 + col];
-				fprintf(stderr, "Res = %.3f\tA = %.3f\tB = %.3f\n", cell, matrix1[row * cols2 + col], matrix2[row * cols2 + col]);
+			for( int c = 0; c < cols1; c++ ) {
+				cell += matrix1[row * cols1 + c] * matrix2[c * cols2 + col];
 			}
 			result[row * cols2 + col] = cell;
 		} 
@@ -101,15 +109,37 @@ void * product_thread(void* arg)
 {
 	int sector = step++;
 	thread_struct * current = (thread_struct * ) arg;
-    for (int i = sector * current->rows1 / 4; i < (sector + 1) * current->rows1 / 4; i++) {
-    	for(int j = sector * current->cols2 / 4; j < (sector + 1) * current->cols2 / 4; j++) {
-    		for (int l = 0; l < current->rows1; l++) {
-	        	for (int k = 0; k < current->cols2; k++) {
-	        		fprintf(stderr, "Index = %d\tInit = %.3f\t", sector, current->result[i * current->cols2 + j]); 
-	                current->result[i * current->cols2 + j] += current->matrix1[i * current->cols1 + k] * current->matrix2[k * current->cols2 + l];
-	                fprintf(stderr, "Res = %.3f\tA = %.3f\tB = %.3f\n", current->result[i * current->cols2 + j], current->matrix1[i * current->cols1 + k], current->matrix2[k * current->cols2 + l]);
-	            } 
-	        }
+	int max_i, min_i, max_j, min_j;
+	if(sector == 0 || sector == 1) {
+		//max_i = (sector + 1) * current->rows1 / 4;
+		//min_i = sector * current->rows1 / 4;
+		max_i = current->rows1 / 2;
+		min_i = 0;
+	} else {
+		max_i = current->rows1;
+		min_i = current->rows1 / 2;
+		//min_j = sector * current->cols2 / 4;
+		//max_j = (sector + 1) * current->cols2 / 4;
+	}
+
+	if(sector % 2 == 0) {
+		//max_i = (sector + 1) * current->rows1 / 4;
+		//min_i = sector * current->rows1 / 4;
+		max_j = current->cols2 / 2;
+		min_j = 0;
+	} else {
+		max_j = current->cols2;
+		min_j = current->cols2 / 2;
+		//min_j = sector * current->cols2 / 4;
+		//max_j = (sector + 1) * current->cols2 / 4;
+	}
+
+
+    for (int i = min_i; i <= max_i; i++) {
+    	for(int j = min_j; j <= max_j; j++) {
+			for( int c = 0; c < current->cols1; c++ ) {
+				current->result[i * current->cols1 + j] += current->matrix1[i * current->cols1 + c] * current->matrix2[c * current->cols2 + j];
+			}
         }
     }
 } 

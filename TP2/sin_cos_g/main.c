@@ -18,13 +18,21 @@ void update( int sig )
 	cosinus(angle);
 	angle += 10;
 	if(angle > 360)
-		exit(2);
+    {
+        execlp("gnuplot", "gnuplot","-persist", "commandes.gp", 0);
+        exit(2);
+    }
+		
 	else
-		alarm(1);
+    {
+        alarm(1);
+    }
+		
 }
 
 int main( ) 
 {
+    int status;
 	int pid1; /* PID du processus fils 1 */
 	int pid2; /* PID du processus fils 2 */
 	struct sigaction action;
@@ -64,12 +72,10 @@ int main( )
 			for(;;);
 		} else {
 			printf("Pere: %d\n", getpid());
-			alarm(1);
-			wait(0);
-			wait(0);	
+            alarm(1);
+			wait(&status);
 		}
 	}
-	execlp("gnuplot", "gnuplot","-persist", "commandes.gp", 0);
 	
 	return 0;
 }

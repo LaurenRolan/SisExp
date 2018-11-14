@@ -39,8 +39,11 @@ int main( )
 		exit(1);
 	}
 
-	random_matrix(matrix1, rows1, cols1, seed1);
-	random_matrix(matrix2, rows2, cols2, seed2);
+	//random_matrix(matrix1, rows1, cols1, seed1);
+	//random_matrix(matrix2, rows2, cols2, seed2);
+
+	ordered_matrix(matrix1, rows1, cols1);
+	ordered_matrix(matrix2, rows2, cols2);
 
 	printf("Matrix 1\n");
 	print_matrix(matrix1, rows1, cols1);
@@ -64,7 +67,7 @@ int main( )
 	(double) (c_after - c_before) / CLOCKS_PER_SEC);
 	printf("Time_t  -> %5.3f seconds\n", difftime(t_after, t_before));
 
-	print_matrix(matrix_result, rows1, cols2);
+	//print_matrix(matrix_result, rows1, cols2);
 
 
 	printf("----------------Thread product----------------\n");
@@ -80,7 +83,7 @@ int main( )
 	(double) (c_after - c_before) / CLOCKS_PER_SEC);
 	printf("Time_t  -> %5.3f seconds\n", difftime(t_after, t_before));
 
-	print_matrix(matrix_result, rows1, cols2);
+	//print_matrix(matrix_result, rows1, cols2);
 
 	return 0;
 }
