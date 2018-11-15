@@ -1,5 +1,5 @@
 /* Author: Lauren Sampaio
- * File: matrix.c
+ * File: matrix_product.c
  */
 
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 #include <math.h>
 #include <sys/wait.h>
 #include <pthread.h>
-#include "matrix.h"
+#include "matrix_product.h"
 
 int step = 0;
 
@@ -91,7 +91,66 @@ double * product_matrix_thread(  double * matrix1, int rows1, int cols1, double 
 
 double * product_matrix_fork( double * matrix1, int rows1, int cols1, double * matrix2, int rows2, int cols2  )
 {
-	return NULL;
+	pid_t pid1, pid2, pid3;
+	int sector = 0;
+	double * result;
+	result = alloc_matrix( rows1, cols2 );
+
+	thread_struct current;
+	current.matrix1 = matrix1;
+	current.rows1 = rows1;
+	current.cols1 = cols1;
+	current.matrix2 = matrix2;
+	current.rows2 = rows2;
+	current.cols2 = cols2;
+	current.result = result;
+
+	pid1 = fork( );
+
+	if(pid1 < 0 ) {
+		fprintf(stderr, "Erreur: échec du fork()\n");
+		exit(EXIT_FAILURE);
+	} else if( pid1 == 0 ) {
+		//Fils 1
+		sector++;
+		pid2 = fork();
+
+		if(pid2 < 0) {
+			fprintf(stderr, "Erreur: échec du fork()\n");
+			exit(EXIT_FAILURE);
+		} else if(pid2 == 0) {
+			//Fils 2
+			sector++;
+			pid3 = fork();
+
+			if(pid3 < 0) {
+				fprintf(stderr, "Erreur: échec du fork()\n");
+				exit(EXIT_FAILURE);
+			} else if(pid3 == 0) {
+				//Fils 3
+				sector++;
+				fprintf(stderr, "Fils 3\n");
+				product_calcul( &current, sector );
+			} else {
+				//Fils 2
+				fprintf(stderr, "Fils 2\n");
+				product_calcul( &current, sector );
+				wait(NULL);
+			}
+		} else {
+			//Fils 1
+			fprintf(stderr, "Fils 1\n");
+			product_calcul( &current, sector );
+			wait(NULL);
+		}
+
+	} else {
+		//Pere
+		fprintf(stderr, "Pere\n");
+		product_calcul( &current, sector );
+		wait(NULL);
+	}
+	return current.result;
 }
 
 void print_matrix( double * matrix, int rows, int cols)
@@ -108,38 +167,35 @@ void print_matrix( double * matrix, int rows, int cols)
 void * product_thread(void* arg) 
 {
 	int sector = step++;
-	thread_struct * current = (thread_struct * ) arg;
+	thread_struct * current = ( thread_struct * ) arg;
+	product_calcul( current, sector );
+}
+
+int product_calcul(thread_struct * current, int sector)
+{
 	int max_i, min_i, max_j, min_j;
 	if(sector == 0 || sector == 1) {
-		//max_i = (sector + 1) * current->rows1 / 4;
-		//min_i = sector * current->rows1 / 4;
 		max_i = current->rows1 / 2;
 		min_i = 0;
 	} else {
 		max_i = current->rows1;
 		min_i = current->rows1 / 2;
-		//min_j = sector * current->cols2 / 4;
-		//max_j = (sector + 1) * current->cols2 / 4;
 	}
 
 	if(sector % 2 == 0) {
-		//max_i = (sector + 1) * current->rows1 / 4;
-		//min_i = sector * current->rows1 / 4;
 		max_j = current->cols2 / 2;
 		min_j = 0;
 	} else {
 		max_j = current->cols2;
 		min_j = current->cols2 / 2;
-		//min_j = sector * current->cols2 / 4;
-		//max_j = (sector + 1) * current->cols2 / 4;
 	}
 
-
-    for (int i = min_i; i <= max_i; i++) {
-    	for(int j = min_j; j <= max_j; j++) {
+	for (int i = min_i; i < max_i; i++) {
+    	for(int j = min_j; j < max_j; j++) {
 			for( int c = 0; c < current->cols1; c++ ) {
 				current->result[i * current->cols1 + j] += current->matrix1[i * current->cols1 + c] * current->matrix2[c * current->cols2 + j];
 			}
         }
     }
-} 
+    return 0;
+}

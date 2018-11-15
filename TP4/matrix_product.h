@@ -1,5 +1,5 @@
 /* Author: Lauren Sampaio
- * File: matrix.h
+ * File: matrix_product.h
  */
 
 #define MAX 10
