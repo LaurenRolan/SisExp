@@ -21,7 +21,6 @@ void writeCommand(int b)
 	fprintf(gnuCommand, "set xlabel \"x\"\n");
 	fprintf(gnuCommand, "set xlabel \"sin(x)/x\"\n");
 	fprintf(gnuCommand, "set xrange [0: %d]\n", b);
-	fprintf(gnuCommand, "set xlabel \"x\"\n");
 	fprintf(gnuCommand, "set grid\n");
 	fprintf(gnuCommand, "plot sin(x)/x\n");
 
