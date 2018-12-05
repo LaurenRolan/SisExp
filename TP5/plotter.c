@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 
 
 	/* Open the command for reading. */
-	fp = popen("last | grep -v \"^reboot\" | grep -v \"^wtmp\" | sed 's/[\t ][\t ]*/ /g' | cut -d' ' -f6,7" , "r");
+	fp = popen("last | grep -v \"^reboot\" | grep -v \"^wtmp\" | sed 's/[\t ][\t ]*/ /g' | cut -d' ' -f6,7 | cut -d':' -f1", "r");
 	plot = open(path, O_RDWR | O_CREAT, 0644);
 	
 	if (fp == NULL || plot < 0) {

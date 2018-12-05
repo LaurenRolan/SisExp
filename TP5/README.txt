@@ -3,10 +3,6 @@
  */
 
 --Pour executer le logiciel:
-	make
-	./matrix
+	sh script.sh
 	
-
---Pour supprimer les .o et l'executable:
-	make clean
 
