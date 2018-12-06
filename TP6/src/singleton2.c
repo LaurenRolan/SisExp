@@ -14,16 +14,19 @@
 #include "messages.h"
 
 int current = 0;
-int dead_pid;
+char* dead_pid;
 boite_struct boite;
 
 char * cypher(char * message, int size);
-void kill_agent(int dead_pid);
-void pretend_to_be_him(boite_struct *boite, int size, int dead_pid);
-void update(int sig);
+void kill_agent(char* dead_pid);
+void pretend_to_be_him(int sig);
 
-int main(int argc, char const *argv[])
+int main()
 {
+	struct sigaction action;
+	action.sa_handler = &pretend_to_be_him;
+	sigaction(SIGALRM, &action, NULL);
+
 	int fd;
 	fd = shm_open("/oss0612",  O_RDWR, 0644);
 
@@ -49,7 +52,8 @@ int main(int argc, char const *argv[])
 
 	dead_pid = boite.messages[0].agent;
 	kill_agent(dead_pid);
-	pretend_to_be_him(&boite, 3, dead_pid);
+	alarm(1);
+	while(1);
 
 	return 0;
 }
@@ -90,33 +94,29 @@ char * cypher(char * message, int size)
 	return answer;
 }
 
-void kill_agent(int dead_pid)
+void kill_agent(char* dead_pid)
 {
-	kill(dead_pid, 1);
+	printf("Killed %s\n", dead_pid);
+	kill(atoi(dead_pid) , 1);
 }
 
-void update(int sig)
+void pretend_to_be_him(int sig)
 {
 	FILE * fp;	
 	fp = popen("date", "r");
 
-	char * date[50];
+	char date[50];
 	fgets(date, sizeof(date)-1, fp);
-	
-	char * msg;
+	char msg[256];	
 	sprintf(msg, "[%s] NUL/Je suis un intrus.", date);
+	printf("%s", msg);
+	strcpy(boite.messages[current].agent, dead_pid);
 
-	boite.messages[0].agent = dead_pid;
 	char *cyphred = cypher(msg, strlen(msg));
-	strcpy(boite.messages[0].message, cyphred);
+	strcpy(boite.messages[current].message, cyphred);
 
+	current++;
+	if(current == 3)
+		current = 0;
 	alarm(5);
-}
-
-void pretend_to_be_him()
-{
-	struct sigaction action;
-	action.sa_handler = &update;
-	sigaction(SIGALRM, &action, NULL);
-	alarm(1);
 }
