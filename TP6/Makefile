@@ -2,17 +2,14 @@
 # File: Makefile
 
 CC=gcc
-CFLAGS=-W -Wall -I. 
-LDFLAGS=-lm -lpthread
+CFLAGS=-W -Wall -I.
+LDFLAGS=-lm -lpthread -lrt
 
-matrix: matrix.o main.o
-	$(CC) -o matrix matrix.o main.o $(LDFLAGS) 
+single: single.o 
+	$(CC) -o single single.o $(LDFLAGS) 
 
-matrix.o: matrix_product.c matrix_product.h
-	$(CC) $(CFLAGS) -o matrix.o -c matrix_product.c
-
-main.o: main.c matrix_product.h
-	$(CC) $(CFLAGS) -o main.o -c main.c
+single.o: singleton.c messages.h
+	$(CC) $(CFLAGS) -o single.o -c singleton.c
 
 clean:
-	rm -rf *.o matrix
+	rm -rf *.o single
