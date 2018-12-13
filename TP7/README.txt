@@ -4,7 +4,7 @@
 
 --Pour executer le logiciel:
 	make
-	./spy
+	./single
 	
 
 --Pour supprimer les .o et l'executable:

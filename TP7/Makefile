@@ -1,18 +1,27 @@
 # Author: Lauren Sampaio
 # File: Makefile
+EXE = agent2 case_officer2
 
-CC=gcc
-CFLAGS=-W -Wall -I. 
-LDFLAGS=-lm -lpthread
+CC = gcc
+SRC_DIR = src
+OBJ_DIR = obj
 
-matrix: matrix.o main.o
-	$(CC) -o matrix matrix.o main.o $(LDFLAGS) 
+OBJ = sem_stuff.o
 
-matrix.o: matrix_product.c matrix_product.h
-	$(CC) $(CFLAGS) -o matrix.o -c matrix_product.c
+CFLAGS=-W -Wall -Iinclude
+LDFLAGS += -Llib -lrt
+LDLIBS += 
 
-main.o: main.c matrix_product.h
-	$(CC) $(CFLAGS) -o main.o -c main.c
+.PHONY: all clean
+
+all: $(EXE)
+
+$(EXE): %: $(SRC_DIR)/%.c $(OBJ_DIR)/sem_stuff.o
+	$(CC) $(CFLAGS) -o $@ $< $^ $(LDFLAGS)
+
+$(OBJ_DIR)/sem_stuff.o: $(SRC_DIR)/sem_stuff.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf *.o matrix
+	$(RM) $(OBJ) $(EXE)
+
