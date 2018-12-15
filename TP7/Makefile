@@ -6,9 +6,7 @@ CC = gcc
 SRC_DIR = src
 OBJ_DIR = obj
 
-OBJ = sem_stuff.o
-
-CFLAGS=-W -Wall -Iinclude
+CFLAGS=-W -Wall -Iinclude -pthread
 LDFLAGS += -Llib -lrt
 LDLIBS += 
 
@@ -16,11 +14,8 @@ LDLIBS +=
 
 all: $(EXE)
 
-$(EXE): %: $(SRC_DIR)/%.c $(OBJ_DIR)/sem_stuff.o
-	$(CC) $(CFLAGS) -o $@ $< $^ $(LDFLAGS)
-
-$(OBJ_DIR)/sem_stuff.o: $(SRC_DIR)/sem_stuff.c
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+$(EXE): %: $(SRC_DIR)/%.c 
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 clean:
 	$(RM) $(OBJ) $(EXE)
