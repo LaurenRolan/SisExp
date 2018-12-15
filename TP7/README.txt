@@ -4,7 +4,8 @@
 
 --Pour executer le logiciel:
 	make
-	./single
+	./agent2
+	./case_officer2
 	
 
 --Pour supprimer les .o et l'executable:
